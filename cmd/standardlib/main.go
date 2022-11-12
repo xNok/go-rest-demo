@@ -3,6 +3,8 @@ package main
 import (
 	"net/http"
 	"regexp"
+
+	"github.com/xNok/go-rest-demo/recipes"
 )
 
 var (
@@ -20,16 +22,23 @@ func main() {
 	mux := http.NewServeMux()
 
 	// Register the routes and handlers
-	mux.Handle("/", &home{})
-	mux.Handle("/recipes", &recipes{})
+	mux.Handle("/", &homeHandler{})
+	mux.Handle("/recipes", &recipesHandler{})
 
 	// Run the server
 	http.ListenAndServe(":8080", mux)
 }
 
-type recipes struct{}
+type recipesHandler struct{}
 
-func (h *recipes) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+type recipeStore interface {
+	Add(name string, recipe recipes.Recipe) error
+	Get(name string) (recipes.Recipe, error)
+	List() (map[string]recipes.Recipe, error)
+	Remove(name string) error
+}
+
+func (h *recipesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case r.Method == http.MethodPost && createRecipeRe.MatchString(r.URL.Path):
 		h.CreateRecipe(w, r)
@@ -51,28 +60,28 @@ func (h *recipes) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *recipes) CreateRecipe(w http.ResponseWriter, r *http.Request) {
+func (h *recipesHandler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h *recipes) ListRecipies(w http.ResponseWriter, r *http.Request) {
+func (h *recipesHandler) ListRecipies(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h *recipes) GetRecipie(w http.ResponseWriter, r *http.Request) {
+func (h *recipesHandler) GetRecipie(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h *recipes) UpdateRecipe(w http.ResponseWriter, r *http.Request) {
+func (h *recipesHandler) UpdateRecipe(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h *recipes) DeleteRecipe(w http.ResponseWriter, r *http.Request) {
+func (h *recipesHandler) DeleteRecipe(w http.ResponseWriter, r *http.Request) {
 
 }
 
-type home struct{}
+type homeHandler struct{}
 
-func (h *home) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *homeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("This is my home page"))
 }
