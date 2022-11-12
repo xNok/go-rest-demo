@@ -8,11 +8,8 @@ import (
 )
 
 var (
-	createRecipeRe = regexp.MustCompile(`^\/recipes[\/]*$`)
-	listRecipesRe  = regexp.MustCompile(`^\/recipes[\/]*$`)
-	getRecipeRe    = regexp.MustCompile(`^\/recipes\/(\d+)$`)
-	updateRecipeRe = regexp.MustCompile(`^\/recipes\/(\d+)$`)
-	deleteRecipeRe = regexp.MustCompile(`^\/recipes\/(\d+)$`)
+	RecipeRe       = regexp.MustCompile(`^\/recipes[\/]*$`)
+	RecipeReWithID = regexp.MustCompile(`^\/recipes\/(\d+)$`)
 )
 
 func main() {
@@ -40,19 +37,19 @@ type recipeStore interface {
 
 func (h *recipesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch {
-	case r.Method == http.MethodPost && createRecipeRe.MatchString(r.URL.Path):
+	case r.Method == http.MethodPost && RecipeRe.MatchString(r.URL.Path):
 		h.CreateRecipe(w, r)
 		return
-	case r.Method == http.MethodGet && listRecipesRe.MatchString(r.URL.Path):
+	case r.Method == http.MethodGet && RecipeRe.MatchString(r.URL.Path):
 		h.ListRecipies(w, r)
 		return
-	case r.Method == http.MethodPost && getRecipeRe.MatchString(r.URL.Path):
+	case r.Method == http.MethodPost && RecipeReWithID.MatchString(r.URL.Path):
 		h.GetRecipie(w, r)
 		return
-	case r.Method == http.MethodPut && updateRecipeRe.MatchString(r.URL.Path):
+	case r.Method == http.MethodPut && RecipeReWithID.MatchString(r.URL.Path):
 		h.UpdateRecipe(w, r)
 		return
-	case r.Method == http.MethodDelete && deleteRecipeRe.MatchString(r.URL.Path):
+	case r.Method == http.MethodDelete && RecipeReWithID.MatchString(r.URL.Path):
 		h.DeleteRecipe(w, r)
 		return
 	default:

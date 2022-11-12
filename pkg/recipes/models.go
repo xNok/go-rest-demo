@@ -6,7 +6,7 @@ type Recipe struct {
 	Ingredients []Ingredient `json:"ingredient"`
 }
 
-// represent individual ingredients
+// represents individual ingredients
 type Ingredient struct {
 	Name string `json:"name"`
 }
