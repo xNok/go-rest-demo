@@ -1,6 +1,17 @@
 package main
 
-import "net/http"
+import (
+	"net/http"
+	"regexp"
+)
+
+var (
+	createRecipeRe = regexp.MustCompile(`^\/recipes[\/]*$`)
+	listRecipesRe  = regexp.MustCompile(`^\/recipes[\/]*$`)
+	getRecipeRe    = regexp.MustCompile(`^\/recipes\/(\d+)$`)
+	updateRecipeRe = regexp.MustCompile(`^\/recipes\/(\d+)$`)
+	deleteRecipeRe = regexp.MustCompile(`^\/recipes\/(\d+)$`)
+)
 
 func main() {
 
@@ -19,7 +30,45 @@ func main() {
 type recipes struct{}
 
 func (h *recipes) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("This is my recipe page"))
+	switch {
+	case r.Method == http.MethodPost && createRecipeRe.MatchString(r.URL.Path):
+		h.CreateRecipe(w, r)
+		return
+	case r.Method == http.MethodGet && listRecipesRe.MatchString(r.URL.Path):
+		h.ListRecipies(w, r)
+		return
+	case r.Method == http.MethodPost && getRecipeRe.MatchString(r.URL.Path):
+		h.GetRecipie(w, r)
+		return
+	case r.Method == http.MethodPut && updateRecipeRe.MatchString(r.URL.Path):
+		h.UpdateRecipe(w, r)
+		return
+	case r.Method == http.MethodDelete && deleteRecipeRe.MatchString(r.URL.Path):
+		h.DeleteRecipe(w, r)
+		return
+	default:
+		return
+	}
+}
+
+func (h *recipes) CreateRecipe(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (h *recipes) ListRecipies(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (h *recipes) GetRecipie(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (h *recipes) UpdateRecipe(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (h *recipes) DeleteRecipe(w http.ResponseWriter, r *http.Request) {
+
 }
 
 type home struct{}
