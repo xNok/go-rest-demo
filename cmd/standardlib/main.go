@@ -14,19 +14,31 @@ var (
 
 func main() {
 
+	//
+	store := recipes.NewMemStore()
+	recipesHandler := NewRecipesHandler(store)
+
 	// Create a new request multiplexer
 	// Takes incoming requests and dispatch them to the matching handlers
 	mux := http.NewServeMux()
 
 	// Register the routes and handlers
 	mux.Handle("/", &homeHandler{})
-	mux.Handle("/recipes", &recipesHandler{})
+	mux.Handle("/recipes", recipesHandler)
 
 	// Run the server
 	http.ListenAndServe(":8080", mux)
 }
 
-type recipesHandler struct{}
+type recipesHandler struct {
+	store recipeStore
+}
+
+func NewRecipesHandler(s recipeStore) *recipesHandler {
+	return &recipesHandler{
+		store: s,
+	}
+}
 
 type recipeStore interface {
 	Add(name string, recipe recipes.Recipe) error
@@ -35,7 +47,7 @@ type recipeStore interface {
 	Remove(name string) error
 }
 
-func (h *recipesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h recipesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case r.Method == http.MethodPost && RecipeRe.MatchString(r.URL.Path):
 		h.CreateRecipe(w, r)
@@ -62,7 +74,7 @@ func (h *recipesHandler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *recipesHandler) ListRecipies(w http.ResponseWriter, r *http.Request) {
-
+	h.store.List()
 }
 
 func (h *recipesHandler) GetRecipie(w http.ResponseWriter, r *http.Request) {

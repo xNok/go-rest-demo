@@ -6,6 +6,10 @@ type MemStore struct {
 	list map[string]Recipe
 }
 
+func NewMemStore() *MemStore {
+	return &MemStore{}
+}
+
 func (m MemStore) Add(name string, recipe Recipe) error {
 	m.list[name] = recipe
 	return nil
