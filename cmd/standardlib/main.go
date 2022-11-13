@@ -9,13 +9,13 @@ import (
 )
 
 var (
-	RecipeRe       = regexp.MustCompile(`^\/recipes[\/]*$`)
-	RecipeReWithID = regexp.MustCompile(`^\/recipes\/([a-z0-9]+(?:-[a-z0-9]+)+)$`)
+	RecipeRe       = regexp.MustCompile(`^/recipes/*$`)
+	RecipeReWithID = regexp.MustCompile(`^/recipes/([a-z0-9]+(?:-[a-z0-9]+)+)$`)
 )
 
 func main() {
 
-	//
+	// create the Store and Recipe Handler
 	store := recipes.NewMemStore()
 	recipesHandler := NewRecipesHandler(store)
 
@@ -31,16 +31,17 @@ func main() {
 	http.ListenAndServe(":8080", mux)
 }
 
-type recipesHandler struct {
-	store recipeStore
+func InternalServerErrorHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusInternalServerError)
+	w.Write([]byte("500 Internal Server Error"))
 }
 
-func NewRecipesHandler(s recipeStore) *recipesHandler {
-	return &recipesHandler{
-		store: s,
-	}
+func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
+	w.Write([]byte("404 Not Found"))
 }
 
+// recipeStore represent a data storage containing recipes
 type recipeStore interface {
 	Add(name string, recipe recipes.Recipe) error
 	Get(name string) (recipes.Recipe, error)
@@ -49,7 +50,18 @@ type recipeStore interface {
 	Remove(name string) error
 }
 
-func (h recipesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+// RecipesHandler implements http.Handler and dispatch request to the store
+type RecipesHandler struct {
+	store recipeStore
+}
+
+func NewRecipesHandler(s recipeStore) *RecipesHandler {
+	return &RecipesHandler{
+		store: s,
+	}
+}
+
+func (h *RecipesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case r.Method == http.MethodPost && RecipeRe.MatchString(r.URL.Path):
 		h.CreateRecipe(w, r)
@@ -72,17 +84,7 @@ func (h recipesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func InternalServerErrorHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusInternalServerError)
-	w.Write([]byte("500 Internal Server Error"))
-}
-
-func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotFound)
-	w.Write([]byte("404 Not Found"))
-}
-
-func (h *recipesHandler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
+func (h *RecipesHandler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	// Recipe object that will be populated from json payload
 	var recipe recipes.Recipe
 
@@ -101,10 +103,10 @@ func (h *recipesHandler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (h *recipesHandler) ListRecipes(w http.ResponseWriter, r *http.Request) {
-	recipes, err := h.store.List()
+func (h *RecipesHandler) ListRecipes(w http.ResponseWriter, r *http.Request) {
+	recipesList, err := h.store.List()
 
-	jsonBytes, err := json.Marshal(recipes)
+	jsonBytes, err := json.Marshal(recipesList)
 	if err != nil {
 		InternalServerErrorHandler(w, r)
 		return
@@ -114,7 +116,7 @@ func (h *recipesHandler) ListRecipes(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonBytes)
 }
 
-func (h *recipesHandler) GetRecipe(w http.ResponseWriter, r *http.Request) {
+func (h *RecipesHandler) GetRecipe(w http.ResponseWriter, r *http.Request) {
 	matches := RecipeReWithID.FindStringSubmatch(r.URL.Path)
 	if len(matches) < 2 {
 		InternalServerErrorHandler(w, r)
@@ -142,7 +144,7 @@ func (h *recipesHandler) GetRecipe(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonBytes)
 }
 
-func (h *recipesHandler) UpdateRecipe(w http.ResponseWriter, r *http.Request) {
+func (h *RecipesHandler) UpdateRecipe(w http.ResponseWriter, r *http.Request) {
 	matches := RecipeReWithID.FindStringSubmatch(r.URL.Path)
 	if len(matches) < 2 {
 		InternalServerErrorHandler(w, r)
@@ -161,22 +163,14 @@ func (h *recipesHandler) UpdateRecipe(w http.ResponseWriter, r *http.Request) {
 			NotFoundHandler(w, r)
 			return
 		}
-
-		InternalServerErrorHandler(w, r)
-		return
-	}
-
-	jsonBytes, err := json.Marshal(recipe)
-	if err != nil {
 		InternalServerErrorHandler(w, r)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write(jsonBytes)
 }
 
-func (h *recipesHandler) DeleteRecipe(w http.ResponseWriter, r *http.Request) {
+func (h *RecipesHandler) DeleteRecipe(w http.ResponseWriter, r *http.Request) {
 	matches := RecipeReWithID.FindStringSubmatch(r.URL.Path)
 	if len(matches) < 2 {
 		InternalServerErrorHandler(w, r)
