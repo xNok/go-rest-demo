@@ -32,6 +32,16 @@ func (m MemStore) List() (map[string]Recipe, error) {
 	return m.list, nil
 }
 
+func (m MemStore) Update(name string, recipe Recipe) error {
+
+	if _, ok := m.list[name]; ok {
+		m.list[name] = recipe
+		return nil
+	}
+
+	return NotFoundErr
+}
+
 func (m MemStore) Remove(name string) error {
 	delete(m.list, name)
 	return nil

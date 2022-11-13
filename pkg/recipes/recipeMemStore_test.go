@@ -7,6 +7,17 @@ import (
 	"testing"
 )
 
+func getHamCheeseToasties() Recipe {
+	return Recipe{
+		Name: "ham and cheese toastie",
+		Ingredients: []Ingredient{
+			{Name: "bread"},
+			{Name: "ham"},
+			{Name: "cheese"},
+		},
+	}
+}
+
 func TestMemStore_Add(t *testing.T) {
 	type fields struct {
 		list map[string]Recipe
@@ -47,17 +58,6 @@ func TestMemStore_Add(t *testing.T) {
 
 			assert.Len(t, tt.fields.list, tt.wantLen)
 		})
-	}
-}
-
-func getHamCheeseToasties() Recipe {
-	return Recipe{
-		Name: "ham and cheese toastie",
-		Ingredients: []Ingredient{
-			{Name: "bread"},
-			{Name: "ham"},
-			{Name: "cheese"},
-		},
 	}
 }
 
@@ -200,6 +200,64 @@ func TestMemStore_Remove(t *testing.T) {
 
 			err := m.Remove(tt.args.name)
 
+			if tt.wantErr != nil {
+				if !tt.wantErr(t, err, fmt.Sprintf("List()")) {
+					assert.Fail(t, "Invalid error")
+				}
+			} else {
+				assert.NoError(t, err)
+			}
+
+			assert.Len(t, m.list, tt.wantLen)
+		})
+	}
+}
+
+func TestMemStore_Update(t *testing.T) {
+	type fields struct {
+		list map[string]Recipe
+	}
+	type args struct {
+		name   string
+		recipe Recipe
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr assert.ErrorAssertionFunc
+		wantLen int
+	}{
+		{
+			name: "Update butter to Ham and cheese",
+			fields: fields{
+				map[string]Recipe{
+					"Ham and cheese toasties": getHamCheeseToasties(),
+				},
+			},
+			args: args{
+				name: "Ham and cheese toasties",
+				recipe: Recipe{
+					Name: "Ham and cheese toasties",
+					Ingredients: []Ingredient{
+						{Name: "bread"},
+						{Name: "ham"},
+						{Name: "cheese"},
+						{Name: "butter"},
+					},
+				},
+			},
+			wantErr: nil,
+			wantLen: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := MemStore{
+				list: tt.fields.list,
+			}
+
+			err := m.Update(tt.args.name, tt.args.recipe)
 			if tt.wantErr != nil {
 				if !tt.wantErr(t, err, fmt.Sprintf("List()")) {
 					assert.Fail(t, "Invalid error")
