@@ -2,6 +2,10 @@ package recipes
 
 import "errors"
 
+var (
+	NotFoundErr = errors.New("not found")
+)
+
 type MemStore struct {
 	list map[string]Recipe
 }
@@ -17,11 +21,11 @@ func (m MemStore) Add(name string, recipe Recipe) error {
 
 func (m MemStore) Get(name string) (Recipe, error) {
 
-	if val, ok := m.list["foo"]; ok {
+	if val, ok := m.list[name]; ok {
 		return val, nil
 	}
 
-	return Recipe{}, errors.New("not found")
+	return Recipe{}, NotFoundErr
 }
 
 func (m MemStore) List() (map[string]Recipe, error) {
