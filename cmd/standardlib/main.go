@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/gosimple/slug"
 	"github.com/xNok/go-rest-demo/pkg/recipes"
 	"net/http"
 	"regexp"
@@ -9,7 +10,7 @@ import (
 
 var (
 	RecipeRe       = regexp.MustCompile(`^\/recipes[\/]*$`)
-	RecipeReWithID = regexp.MustCompile(`^\/recipes\/(\d+)$`)
+	RecipeReWithID = regexp.MustCompile(`^\/recipes\/([a-z0-9]+(?:-[a-z0-9]+)+)$`)
 )
 
 func main() {
@@ -56,7 +57,7 @@ func (h recipesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case r.Method == http.MethodGet && RecipeRe.MatchString(r.URL.Path):
 		h.ListRecipes(w, r)
 		return
-	case r.Method == http.MethodPost && RecipeReWithID.MatchString(r.URL.Path):
+	case r.Method == http.MethodGet && RecipeReWithID.MatchString(r.URL.Path):
 		h.GetRecipe(w, r)
 		return
 	case r.Method == http.MethodPut && RecipeReWithID.MatchString(r.URL.Path):
@@ -66,6 +67,7 @@ func (h recipesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.DeleteRecipe(w, r)
 		return
 	default:
+		NotFoundHandler(w, r)
 		return
 	}
 }
@@ -83,12 +85,15 @@ func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
 func (h *recipesHandler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	// Recipe object that will be populated from json payload
 	var recipe recipes.Recipe
+
 	if err := json.NewDecoder(r.Body).Decode(&recipe); err != nil {
 		InternalServerErrorHandler(w, r)
 		return
 	}
 
-	if err := h.store.Add(recipe.Name, recipe); err != nil {
+	resourceID := slug.Make(recipe.Name)
+
+	if err := h.store.Add(resourceID, recipe); err != nil {
 		InternalServerErrorHandler(w, r)
 		return
 	}
@@ -151,7 +156,7 @@ func (h *recipesHandler) UpdateRecipe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.store.Update(matches[0], recipe); err != nil {
+	if err := h.store.Update(matches[1], recipe); err != nil {
 		if err == recipes.NotFoundErr {
 			NotFoundHandler(w, r)
 			return

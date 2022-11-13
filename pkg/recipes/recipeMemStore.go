@@ -11,7 +11,10 @@ type MemStore struct {
 }
 
 func NewMemStore() *MemStore {
-	return &MemStore{}
+	list := make(map[string]Recipe)
+	return &MemStore{
+		list,
+	}
 }
 
 func (m MemStore) Add(name string, recipe Recipe) error {

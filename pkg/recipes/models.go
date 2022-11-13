@@ -3,7 +3,7 @@ package recipes
 // represents a recipe
 type Recipe struct {
 	Name        string       `json:"name"`
-	Ingredients []Ingredient `json:"ingredient"`
+	Ingredients []Ingredient `json:"ingredients"`
 }
 
 // represents individual ingredients
