@@ -26,6 +26,7 @@ func main() {
 	// Register the routes and handlers
 	mux.Handle("/", &homeHandler{})
 	mux.Handle("/recipes", recipesHandler)
+	mux.Handle("/recipes/", recipesHandler)
 
 	// Run the server
 	http.ListenAndServe(":8080", mux)
