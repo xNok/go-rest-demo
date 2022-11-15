@@ -12,9 +12,11 @@ func main() {
 	// create the Store and Recipe Handler
 	store := recipes.NewMemStore()
 	recipesHandler := NewRecipesHandler(store)
+	home := homeHandler{}
 
 	router := mux.NewRouter()
 
+	router.HandleFunc("/", home.ServeHTTP)
 	router.HandleFunc("/recipes", recipesHandler.ListRecipes).Methods("GET")
 	router.HandleFunc("/recipes", recipesHandler.CreateRecipe).Methods("POST")
 	router.HandleFunc("/recipes/{id}", recipesHandler.GetRecipe).Methods("GET")
@@ -149,16 +151,8 @@ func (h *RecipesHandler) DeleteRecipe(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-type homeHandler struct {
-	router *mux.Router
-}
+type homeHandler struct{}
 
-func initializeHomeHandler(router *mux.Router) {
-	h := homeHandler{}
-	h.router = router
-	h.router.HandleFunc("/", h.getHome)
-}
-
-func (h *homeHandler) getHome(w http.ResponseWriter, r *http.Request) {
+func (h *homeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("This is my home page"))
 }
