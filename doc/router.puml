@@ -1,0 +1,22 @@
+@startuml
+
+left to right direction
+'top to bottom direction
+
+actor John
+rectangle Router
+rectangle A
+rectangle B
+rectangle C
+
+John -[#red,dashed,thickness=2]-> Router : "GET  /recipes/apple-pie"
+Router --> A : "GET  /recipes"
+Router -[#red,dashed,thickness=2]-> B : "GET  /recipes/{id}"
+Router --> C : "POST /recipes"
+
+note bottom  of (Router)
+  Assign the request to B
+  Base on PATH and verb
+end note
+
+@enduml
