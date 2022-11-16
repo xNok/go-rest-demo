@@ -20,7 +20,7 @@ func main() {
 	router.HandleFunc("/recipes", recipesHandler.ListRecipes).Methods("GET")
 	router.HandleFunc("/recipes", recipesHandler.CreateRecipe).Methods("POST")
 	router.HandleFunc("/recipes/{id}", recipesHandler.GetRecipe).Methods("GET")
-	router.HandleFunc("/recipes/{id}", recipesHandler.UpdateRecipe).Methods("UPDATE")
+	router.HandleFunc("/recipes/{id}", recipesHandler.UpdateRecipe).Methods("PUT")
 	router.HandleFunc("/recipes/{id}", recipesHandler.DeleteRecipe).Methods("DELETE")
 
 	http.ListenAndServe(":8010", router)
