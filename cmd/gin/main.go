@@ -75,6 +75,7 @@ func (h RecipesHandler) ListRecipes(c *gin.Context) {
 
 	c.JSON(200, r)
 }
+
 func (h RecipesHandler) GetRecipe(c *gin.Context) {
 	id := c.Param("id")
 
@@ -85,6 +86,7 @@ func (h RecipesHandler) GetRecipe(c *gin.Context) {
 
 	c.JSON(200, recipe)
 }
+
 func (h RecipesHandler) UpdateRecipe(c *gin.Context) {
 	// Get request body and convert it to recipes.Recipe
 	var recipe recipes.Recipe
@@ -108,6 +110,7 @@ func (h RecipesHandler) UpdateRecipe(c *gin.Context) {
 	// return success payload
 	c.JSON(http.StatusOK, gin.H{"status": "success"})
 }
+
 func (h RecipesHandler) DeleteRecipe(c *gin.Context) {
 	id := c.Param("id")
 
