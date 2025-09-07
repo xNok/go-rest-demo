@@ -1,0 +1,13 @@
+version: '3'
+
+tasks:
+  generate-client:
+    cmds:
+      - go tool oapi-codegen -generate types,client -package client -o pkg/client/client.go openapi.yaml
+    sources:
+      - openapi.yaml
+    generates:
+      - pkg/client/client.go
+  test:
+    cmds:
+      - go test -v ./test

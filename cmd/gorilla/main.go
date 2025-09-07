@@ -17,13 +17,14 @@ func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/", home.ServeHTTP)
+	router.HandleFunc("/health", healthHandler).Methods("GET")
 	router.HandleFunc("/recipes", recipesHandler.ListRecipes).Methods("GET")
 	router.HandleFunc("/recipes", recipesHandler.CreateRecipe).Methods("POST")
 	router.HandleFunc("/recipes/{id}", recipesHandler.GetRecipe).Methods("GET")
 	router.HandleFunc("/recipes/{id}", recipesHandler.UpdateRecipe).Methods("PUT")
 	router.HandleFunc("/recipes/{id}", recipesHandler.DeleteRecipe).Methods("DELETE")
 
-	http.ListenAndServe(":8010", router)
+	http.ListenAndServe(":8080", router)
 }
 
 func InternalServerErrorHandler(w http.ResponseWriter, r *http.Request) {
@@ -82,6 +83,7 @@ func (h *RecipesHandler) ListRecipes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonBytes)
 }
@@ -106,6 +108,7 @@ func (h *RecipesHandler) GetRecipe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonBytes)
 }
@@ -136,6 +139,7 @@ func (h *RecipesHandler) UpdateRecipe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonBytes)
 }
@@ -155,4 +159,8 @@ type homeHandler struct{}
 
 func (h *homeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("This is my home page"))
+}
+
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
 }
