@@ -17,6 +17,7 @@ func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/", home.ServeHTTP)
+	router.HandleFunc("/health", healthHandler).Methods("GET")
 	router.HandleFunc("/recipes", recipesHandler.ListRecipes).Methods("GET")
 	router.HandleFunc("/recipes", recipesHandler.CreateRecipe).Methods("POST")
 	router.HandleFunc("/recipes/{id}", recipesHandler.GetRecipe).Methods("GET")
@@ -158,4 +159,8 @@ type homeHandler struct{}
 
 func (h *homeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("This is my home page"))
+}
+
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
 }

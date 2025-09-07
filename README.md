@@ -19,6 +19,7 @@ The API provides the following endpoints:
 
 | Method   | Path             | Description                  |
 |----------|------------------|------------------------------|
+| `GET`    | `/health`        | Get server health status     |
 | `GET`    | `/recipes`       | Get a list of all recipes    |
 | `POST`   | `/recipes`       | Create a new recipe          |
 | `GET`    | `/recipes/{id}`  | Get a single recipe by its ID|

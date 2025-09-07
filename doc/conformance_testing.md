@@ -25,12 +25,12 @@ The `Taskfile.yaml` file provides a simple way to manage common development task
 To regenerate the client, run:
 
 ```bash
-go run github.com/go-task/task/v3/cmd/task generate-client
+go tool task generate-client
 ```
 
-### 4. Tool Dependencies (`tools.go`)
+### 4. Tool Dependencies
 
-The specific versions of the tools used for development, such as `task` and `oapi-codegen`, are managed in the `go.mod` file. The `tools.go` file is used to declare these build-time dependencies so that they are tracked by the Go module system.
+The specific versions of the tools used for development, such as `task` and `oapi-codegen`, are managed in the `go.mod` file using the `tool` directive.
 
 ### 5. Conformance Tests (`test/conformance_test.go`)
 
@@ -47,4 +47,8 @@ To run the full suite of conformance tests against all implementations, use the 
 
 ```bash
 go test -v ./test
+```
+Or use the `test` task in the `Taskfile.yaml`:
+```bash
+go tool task test
 ```

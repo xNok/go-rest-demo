@@ -25,6 +25,7 @@ func main() {
 
 	// Register the routes and handlers
 	mux.Handle("/", &homeHandler{})
+	mux.Handle("/health", &healthHandler{})
 	mux.Handle("/recipes", recipesHandler)
 	mux.Handle("/recipes/", recipesHandler)
 
@@ -36,6 +37,12 @@ type homeHandler struct{}
 
 func (h *homeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("This is my home page"))
+}
+
+type healthHandler struct{}
+
+func (h *healthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
 }
 
 func InternalServerErrorHandler(w http.ResponseWriter, r *http.Request) {

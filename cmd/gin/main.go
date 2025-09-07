@@ -17,6 +17,7 @@ func main() {
 
 	// Register Routes
 	router.GET("/", homePage)
+	router.GET("/health", healthHandler)
 	router.GET("/recipes", recipesHandler.ListRecipes)
 	router.POST("/recipes", recipesHandler.CreateRecipe)
 	router.GET("/recipes/:id", recipesHandler.GetRecipe)
@@ -29,6 +30,10 @@ func main() {
 
 func homePage(c *gin.Context) {
 	c.String(http.StatusOK, "This is my home page")
+}
+
+func healthHandler(c *gin.Context) {
+	c.Status(http.StatusOK)
 }
 
 type RecipesHandler struct {
