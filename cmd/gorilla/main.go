@@ -23,7 +23,7 @@ func main() {
 	router.HandleFunc("/recipes/{id}", recipesHandler.UpdateRecipe).Methods("PUT")
 	router.HandleFunc("/recipes/{id}", recipesHandler.DeleteRecipe).Methods("DELETE")
 
-	http.ListenAndServe(":8010", router)
+	http.ListenAndServe(":8080", router)
 }
 
 func InternalServerErrorHandler(w http.ResponseWriter, r *http.Request) {
@@ -82,6 +82,7 @@ func (h *RecipesHandler) ListRecipes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonBytes)
 }
@@ -106,6 +107,7 @@ func (h *RecipesHandler) GetRecipe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonBytes)
 }
@@ -136,6 +138,7 @@ func (h *RecipesHandler) UpdateRecipe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonBytes)
 }

@@ -1,0 +1,10 @@
+version: '3'
+
+tasks:
+  generate-client:
+    cmds:
+      - go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest -generate types,client -package client -o pkg/client/client.go openapi.yaml
+    sources:
+      - openapi.yaml
+    generates:
+      - pkg/client/client.go
