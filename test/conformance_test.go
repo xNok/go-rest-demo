@@ -2,35 +2,38 @@ package test
 
 import (
 	"context"
+	"fmt"
 	"github.com/gosimple/slug"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/xNok/go-rest-demo/pkg/client"
+	"github.com/xNok/go-rest-demo/pkg/gin"
+	"github.com/xNok/go-rest-demo/pkg/gorilla"
+	"github.com/xNok/go-rest-demo/pkg/rest"
+	"github.com/xNok/go-rest-demo/pkg/standardlib"
 	"net/http"
-	"os/exec"
 	"testing"
 	"time"
 )
 
-const (
-	serverUrl = "http://localhost:8080"
-)
-
 var implementations = []struct {
-	name string
-	path string
+	name   string
+	server rest.Server
 }{
-	{"standard-library", "../cmd/standardlib/main.go"},
-	{"gorilla", "../cmd/gorilla/main.go"},
-	{"gin", "../cmd/gin/main.go"},
+	{"standard-library", standardlib.NewServer()},
+	{"gorilla", gorilla.NewServer()},
+	{"gin", gin.NewServer()},
 }
 
 func TestConformance(t *testing.T) {
-	for _, impl := range implementations {
+	for i, impl := range implementations {
+		port := 8080 + i
+		serverUrl := fmt.Sprintf("http://localhost:%d", port)
+
 		t.Run(impl.name, func(t *testing.T) {
-			cmd := exec.Command("go", "run", impl.path)
-			err := cmd.Start()
-			require.NoError(t, err, "Failed to start server")
+			go func() {
+				impl.server.Run(port)
+			}()
 
 			// Poll the health check endpoint until the server is ready
 			require.Eventually(t, func() bool {
@@ -43,8 +46,8 @@ func TestConformance(t *testing.T) {
 			}, 5*time.Second, 100*time.Millisecond, "Server did not start in time")
 
 			defer func() {
-				err := cmd.Process.Kill()
-				require.NoError(t, err, "Failed to kill server process")
+				err := impl.server.Stop(context.Background())
+				require.NoError(t, err, "Failed to stop server")
 			}()
 
 			c, err := client.NewClientWithResponses(serverUrl)
