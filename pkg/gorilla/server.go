@@ -1,14 +1,16 @@
-package main
+package gorilla
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/gosimple/slug"
 	"github.com/xNok/go-rest-demo/pkg/recipes"
 	"net/http"
 )
 
-func main() {
+func NewServer() *Server {
 	// create the Store and Recipe Handler
 	store := recipes.NewMemStore()
 	recipesHandler := NewRecipesHandler(store)
@@ -24,7 +26,26 @@ func main() {
 	router.HandleFunc("/recipes/{id}", recipesHandler.UpdateRecipe).Methods("PUT")
 	router.HandleFunc("/recipes/{id}", recipesHandler.DeleteRecipe).Methods("DELETE")
 
-	http.ListenAndServe(":8080", router)
+	return &Server{
+		router: router,
+	}
+}
+
+type Server struct {
+	router     *mux.Router
+	httpServer *http.Server
+}
+
+func (s *Server) Run(port int) error {
+	s.httpServer = &http.Server{
+		Addr:    fmt.Sprintf(":%d", port),
+		Handler: s.router,
+	}
+	return s.httpServer.ListenAndServe()
+}
+
+func (s *Server) Stop(ctx context.Context) error {
+	return s.httpServer.Shutdown(ctx)
 }
 
 func InternalServerErrorHandler(w http.ResponseWriter, r *http.Request) {

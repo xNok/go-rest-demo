@@ -1,7 +1,9 @@
-package main
+package standardlib
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/gosimple/slug"
 	"github.com/xNok/go-rest-demo/pkg/recipes"
 	"net/http"
@@ -13,8 +15,7 @@ var (
 	RecipeReWithID = regexp.MustCompile(`^/recipes/([a-z0-9]+(?:-[a-z0-9]+)+)$`)
 )
 
-func main() {
-
+func NewServer() *Server {
 	// create the Store and Recipe Handler
 	store := recipes.NewMemStore()
 	recipesHandler := NewRecipesHandler(store)
@@ -29,8 +30,26 @@ func main() {
 	mux.Handle("/recipes", recipesHandler)
 	mux.Handle("/recipes/", recipesHandler)
 
-	// Run the server
-	http.ListenAndServe(":8080", mux)
+	return &Server{
+		mux: mux,
+	}
+}
+
+type Server struct {
+	mux        *http.ServeMux
+	httpServer *http.Server
+}
+
+func (s *Server) Run(port int) error {
+	s.httpServer = &http.Server{
+		Addr:    fmt.Sprintf(":%d", port),
+		Handler: s.mux,
+	}
+	return s.httpServer.ListenAndServe()
+}
+
+func (s *Server) Stop(ctx context.Context) error {
+	return s.httpServer.Shutdown(ctx)
 }
 
 type homeHandler struct{}

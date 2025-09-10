@@ -1,13 +1,15 @@
-package main
+package gin
 
 import (
+	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gosimple/slug"
 	"github.com/xNok/go-rest-demo/pkg/recipes"
 	"net/http"
 )
 
-func main() {
+func NewServer() *Server {
 	// Create Gin router
 	router := gin.Default()
 
@@ -24,8 +26,26 @@ func main() {
 	router.PUT("/recipes/:id", recipesHandler.UpdateRecipe)
 	router.DELETE("/recipes/:id", recipesHandler.DeleteRecipe)
 
-	// Start the server
-	router.Run()
+	return &Server{
+		router: router,
+	}
+}
+
+type Server struct {
+	router     *gin.Engine
+	httpServer *http.Server
+}
+
+func (s *Server) Run(port int) error {
+	s.httpServer = &http.Server{
+		Addr:    fmt.Sprintf(":%d", port),
+		Handler: s.router,
+	}
+	return s.httpServer.ListenAndServe()
+}
+
+func (s *Server) Stop(ctx context.Context) error {
+	return s.httpServer.Shutdown(ctx)
 }
 
 func homePage(c *gin.Context) {
